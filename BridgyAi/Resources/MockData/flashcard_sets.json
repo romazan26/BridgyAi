@@ -1,0 +1,71 @@
+[
+  {
+    "id": "set_001",
+    "title": "Weekly Stand-up Meetings",
+    "description": "Essential phrases for daily stand-up meetings in tech companies",
+    "workScenario": "business_meetings",
+    "difficulty": "A1-A2",
+    "cards": [
+      {
+        "id": "card_001",
+        "front": "How to say you'll finish a task by Friday?",
+        "back": "I'll have it completed by Friday.",
+        "phonetic": "aɪl hæv ɪt kəmˈpliːtɪd baɪ ˈfraɪdeɪ",
+        "example": "For the Q3 report, I'll have it completed by Friday.",
+        "hint": "Use future perfect for deadlines",
+        "audioURL": null,
+        "imageURL": null,
+        "tags": ["deadlines", "meetings", "promises"]
+      },
+      {
+        "id": "card_002",
+        "front": "How to report progress on a project?",
+        "back": "I'm making good progress on the project.",
+        "phonetic": "aɪm ˈmeɪkɪŋ ɡʊd ˈprəʊɡres ɒn ðə ˈprɒdʒekt",
+        "example": "I'm making good progress on the project. We should finish by next week.",
+        "hint": "Use present continuous for ongoing actions",
+        "audioURL": null,
+        "imageURL": null,
+        "tags": ["progress", "meetings", "updates"]
+      }
+    ],
+    "author": "BridgyAI Team",
+    "isPremium": false,
+    "averageStudyTime": 15,
+    "totalTerms": 12,
+    "createdAt": "2025-12-13T00:00:00Z",
+    "lastStudied": null,
+    "masteryLevel": 0.0,
+    "isFavorite": false
+  },
+  {
+    "id": "set_002",
+    "title": "Email Writing Basics",
+    "description": "Common phrases for professional email communication",
+    "workScenario": "email_correspondence",
+    "difficulty": "A1-A2",
+    "cards": [
+      {
+        "id": "card_003",
+        "front": "How to start a formal email?",
+        "back": "Dear [Name], I hope this email finds you well.",
+        "phonetic": "dɪə neɪm aɪ həʊp ðɪs ˈiːmeɪl faɪndz juː wel",
+        "example": "Dear Mr. Smith, I hope this email finds you well.",
+        "hint": "Use formal greeting for business emails",
+        "audioURL": null,
+        "imageURL": null,
+        "tags": ["email", "greetings", "formal"]
+      }
+    ],
+    "author": "BridgyAI Team",
+    "isPremium": false,
+    "averageStudyTime": 20,
+    "totalTerms": 15,
+    "createdAt": "2025-12-13T00:00:00Z",
+    "lastStudied": null,
+    "masteryLevel": 0.0,
+    "isFavorite": false
+  }
+]
+
+
