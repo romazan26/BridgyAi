@@ -25,6 +25,7 @@ struct PrimaryButton: View {
             HStack(spacing: AppConstants.Spacing.small) {
                 if let icon = icon {
                     Image(systemName: icon)
+                        .font(.system(size: 16, weight: .semibold))
                 }
                 Text(title)
             }
@@ -33,24 +34,53 @@ struct PrimaryButton: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, AppConstants.Spacing.medium)
             .background(
-                LinearGradient(
-                    colors: isEnabled
-                        ? [AppConstants.Colors.bridgyPrimary, AppConstants.Colors.bridgyPrimary.opacity(0.8)]
-                        : [Color.gray.opacity(0.5), Color.gray.opacity(0.4)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                Group {
+                    if isEnabled {
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                AppConstants.Colors.bridgyPrimary,
+                                AppConstants.Colors.bridgySecondary
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    } else {
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color.gray.opacity(0.5),
+                                Color.gray.opacity(0.4)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    }
+                }
             )
             .cornerRadius(AppConstants.CornerRadius.medium)
+            .overlay(
+                RoundedRectangle(cornerRadius: AppConstants.CornerRadius.medium)
+                    .stroke(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color.white.opacity(0.3),
+                                Color.clear
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+            )
             .shadow(
                 color: isEnabled
-                    ? AppConstants.Colors.bridgyPrimary.opacity(0.3)
+                    ? AppConstants.Colors.bridgyPrimary.opacity(0.4)
                     : Color.clear,
-                radius: 8,
+                radius: 12,
                 x: 0,
-                y: 4
+                y: 6
             )
         }
+        .buttonStyle(PrimaryButtonStyle(isEnabled: isEnabled))
         .disabled(!isEnabled)
     }
 }
@@ -60,9 +90,9 @@ struct PrimaryButtonStyle: ButtonStyle {
     
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .opacity(configuration.isPressed ? 0.8 : 1.0)
-            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
+            .opacity(configuration.isPressed ? 0.85 : 1.0)
+            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
     }
 }
 

@@ -11,10 +11,15 @@ struct LibraryView: View {
     @StateObject private var viewModel = LibraryViewModel()
     @State private var selectedSet: FlashcardSet?
     @State private var showingCreateSet = false
+    @State private var showingQuickAddWord = false
+    @State private var showingActionSheet = false
     
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
+                // Анимированный фон
+                AnimatedBackground()
+                
                 VStack(spacing: 0) {
                     // Поиск и фильтры
                     SearchAndFiltersView(
@@ -41,7 +46,15 @@ struct LibraryView: View {
                     } else {
                         ScrollView {
                             LazyVStack(spacing: AppConstants.Spacing.medium) {
-                                ForEach(viewModel.filteredSets) { set in
+                                // Показываем "Мои слова" в начале, если он есть
+                                if let myWordsSet = viewModel.myWordsSet {
+                                    MyWordsSetRowView(set: myWordsSet) {
+                                        selectedSet = myWordsSet
+                                    }
+                                }
+                                
+                                // Остальные наборы (исключая "Мои слова")
+                                ForEach(viewModel.filteredSets.filter { $0.id != AppConstants.SpecialSets.myWordsSetId }) { set in
                                     SetRowView(set: set) {
                                         selectedSet = set
                                     } onToggleFavorite: {
@@ -50,48 +63,88 @@ struct LibraryView: View {
                                 }
                             }
                             .padding()
-                            .padding(.bottom, 80) // Отступ для floating button
+                            .padding(.bottom, 100) // Отступ для floating buttons
                         }
                     }
                 }
                 
-                // Floating Action Button для создания набора
-                Button(action: {
-                    showingCreateSet = true
-                }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "plus")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                        Text("Создать набор")
-                            .font(AppConstants.Fonts.headline)
-                    }
-                    .foregroundColor(.white)
-                    .padding(.horizontal, AppConstants.Spacing.large)
-                    .padding(.vertical, AppConstants.Spacing.medium)
-                    .background(
-                        LinearGradient(
-                            gradient: Gradient(colors: [
-                                AppConstants.Colors.bridgyPrimary,
-                                AppConstants.Colors.bridgySecondary
-                            ]),
-                            startPoint: .leading,
-                            endPoint: .trailing
+                // Floating Action Buttons
+                VStack(spacing: AppConstants.Spacing.small) {
+                    // Кнопка быстрого добавления слова
+                    Button(action: {
+                        showingQuickAddWord = true
+                    }) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "text.badge.plus")
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                            Text("Добавить слово")
+                                .font(AppConstants.Fonts.headline)
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, AppConstants.Spacing.large)
+                        .padding(.vertical, AppConstants.Spacing.medium)
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    AppConstants.Colors.bridgySecondary,
+                                    AppConstants.Colors.bridgyPrimary
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
                         )
-                    )
-                    .cornerRadius(AppConstants.CornerRadius.large)
-                    .shadow(color: AppConstants.Colors.bridgyPrimary.opacity(0.4), radius: 10, x: 0, y: 4)
+                        .cornerRadius(AppConstants.CornerRadius.large)
+                        .shadow(color: AppConstants.Colors.bridgySecondary.opacity(0.4), radius: 10, x: 0, y: 4)
+                    }
+                    
+                    // Кнопка создания набора
+                    Button(action: {
+                        showingCreateSet = true
+                    }) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "plus")
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                            Text("Создать набор")
+                                .font(AppConstants.Fonts.headline)
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, AppConstants.Spacing.large)
+                        .padding(.vertical, AppConstants.Spacing.medium)
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    AppConstants.Colors.bridgyPrimary,
+                                    AppConstants.Colors.bridgySecondary
+                                ]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(AppConstants.CornerRadius.large)
+                        .shadow(color: AppConstants.Colors.bridgyPrimary.opacity(0.4), radius: 10, x: 0, y: 4)
+                    }
                 }
                 .padding(.trailing, AppConstants.Spacing.medium)
                 .padding(.bottom, AppConstants.Spacing.medium)
             }
             .navigationTitle("Библиотека")
-            .background(AppConstants.Colors.bridgyBackground)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        showingCreateSet = true
-                    }) {
+                    Menu {
+                        Button(action: {
+                            showingQuickAddWord = true
+                        }) {
+                            Label("Добавить слово", systemImage: "text.badge.plus")
+                        }
+                        
+                        Button(action: {
+                            showingCreateSet = true
+                        }) {
+                            Label("Создать набор", systemImage: "plus.circle")
+                        }
+                    } label: {
                         Image(systemName: "plus.circle.fill")
                             .font(.title3)
                             .foregroundColor(AppConstants.Colors.bridgyPrimary)
@@ -109,9 +162,18 @@ struct LibraryView: View {
             .sheet(isPresented: $showingCreateSet) {
                 CreateSetView()
             }
+            .sheet(isPresented: $showingQuickAddWord) {
+                QuickAddWordView()
+            }
             .onChange(of: showingCreateSet) { _, isShowing in
                 if !isShowing {
                     // Обновляем список после закрытия экрана создания
+                    viewModel.loadSets()
+                }
+            }
+            .onChange(of: showingQuickAddWord) { _, isShowing in
+                if !isShowing {
+                    // Обновляем список после добавления слова
                     viewModel.loadSets()
                 }
             }
@@ -195,6 +257,81 @@ struct FilterChip: View {
             .foregroundColor(isSelected ? .white : AppConstants.Colors.bridgyText)
             .cornerRadius(AppConstants.CornerRadius.small)
         }
+    }
+}
+
+struct MyWordsSetRowView: View {
+    let set: FlashcardSet
+    let onTap: () -> Void
+    
+    var body: some View {
+        CardView {
+            HStack(spacing: AppConstants.Spacing.medium) {
+                ZStack {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                gradient: Gradient(colors: [
+                                    AppConstants.Colors.bridgySecondary,
+                                    AppConstants.Colors.bridgyPrimary
+                                ]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 50, height: 50)
+                    
+                    Image(systemName: "book.fill")
+                        .font(.title3)
+                        .foregroundColor(.white)
+                }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(set.title)
+                            .font(AppConstants.Fonts.headline)
+                            .lineLimit(1)
+                        
+                        Image(systemName: "star.fill")
+                            .font(.caption)
+                            .foregroundColor(AppConstants.Colors.bridgySecondary)
+                    }
+                    
+                    Text(set.description)
+                        .font(AppConstants.Fonts.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(2)
+                    
+                    HStack(spacing: AppConstants.Spacing.small) {
+                        BadgeView(
+                            text: "\(set.totalTerms) слов",
+                            color: AppConstants.Colors.bridgySecondary
+                        )
+                    }
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.secondary)
+                    .font(.caption)
+            }
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: AppConstants.CornerRadius.medium)
+                .stroke(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            AppConstants.Colors.bridgySecondary.opacity(0.3),
+                            AppConstants.Colors.bridgyPrimary.opacity(0.3)
+                        ]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 2
+                )
+        )
+        .onTapGesture(perform: onTap)
     }
 }
 

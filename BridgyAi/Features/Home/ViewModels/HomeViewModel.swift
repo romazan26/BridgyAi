@@ -32,19 +32,7 @@ class HomeViewModel: ObservableObject {
         isLoading = true
         
         // Загружаем пользователя
-        dataService.getCurrentUser()
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { [weak self] _ in
-                    self?.isLoading = false
-                },
-                receiveValue: { [weak self] user in
-                    self?.userName = user.name
-                    self?.streakDays = user.streakDays
-                    self?.calculateDailyProgress(user: user)
-                }
-            )
-            .store(in: &cancellables)
+        loadUserData()
         
         // Загружаем наборы
         dataService.fetchSets()
@@ -64,6 +52,22 @@ class HomeViewModel: ObservableObject {
                 receiveCompletion: { _ in },
                 receiveValue: { [weak self] sessions in
                     self?.recentSessions = Array(sessions.suffix(5))
+                }
+            )
+            .store(in: &cancellables)
+    }
+    
+    func loadUserData() {
+        dataService.getCurrentUser()
+            .receive(on: DispatchQueue.main)
+            .sink(
+                receiveCompletion: { [weak self] _ in
+                    self?.isLoading = false
+                },
+                receiveValue: { [weak self] user in
+                    self?.userName = user.name
+                    self?.streakDays = user.streakDays
+                    self?.calculateDailyProgress(user: user)
                 }
             )
             .store(in: &cancellables)

@@ -83,46 +83,6 @@ struct LearningModeSelectView: View {
     }
 }
 
-struct SetInfoCard: View {
-    let set: FlashcardSet
-    
-    var body: some View {
-        CardView {
-            VStack(alignment: .leading, spacing: AppConstants.Spacing.medium) {
-                HStack {
-                    Image(systemName: set.workScenario.icon)
-                        .font(.title2)
-                        .foregroundColor(AppConstants.Colors.bridgyPrimary)
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(set.title)
-                            .font(AppConstants.Fonts.headline)
-                        
-                        Text(set.workScenario.title)
-                            .font(AppConstants.Fonts.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Spacer()
-                }
-                
-                Text(set.description)
-                    .font(AppConstants.Fonts.body)
-                    .foregroundColor(.secondary)
-                
-                HStack {
-                    BadgeView(text: set.difficulty.rawValue, color: set.difficulty.color)
-                    Spacer()
-                    Label("\(set.totalTerms) cards", systemImage: "rectangle.stack")
-                        .font(AppConstants.Fonts.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-        }
-        .padding(.horizontal)
-    }
-}
-
 struct ModeCard: View {
     let mode: LearningMode
     

@@ -16,6 +16,7 @@ class AppDependencies {
     let achievementService: AchievementServiceProtocol
     let aiService: AIServiceProtocol
     let networkService: NetworkServiceProtocol
+    let notificationSettingsService: NotificationSettingsServiceProtocol
     
     private init() {
         self.dataService = DataService()
@@ -24,6 +25,7 @@ class AppDependencies {
         self.achievementService = AchievementService(dataService: dataService)
         self.aiService = AIService()
         self.networkService = NetworkService()
+        self.notificationSettingsService = NotificationSettingsService()
     }
 }
 

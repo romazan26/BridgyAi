@@ -6,107 +6,154 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct ProfileView: View {
     @StateObject private var viewModel = ProfileViewModel()
+    @State private var showingEditProfile = false
     
     var body: some View {
         NavigationStack {
-            ScrollView {
+            ZStack {
+                // Анимированный фон
+                AnimatedBackground()
+                
+                ScrollView {
                 VStack(spacing: AppConstants.Spacing.large) {
                     // Профиль пользователя
-                    CardView {
+                    CardView(hasGradient: true) {
                         VStack(spacing: AppConstants.Spacing.medium) {
-                            Image(systemName: "person.circle.fill")
-                                .font(.system(size: 60))
-                                .foregroundColor(AppConstants.Colors.bridgyPrimary)
+                            // Фото профиля с градиентной рамкой
+                            ZStack {
+                                Circle()
+                                    .fill(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [
+                                                AppConstants.Colors.bridgyPrimary,
+                                                AppConstants.Colors.bridgySecondary
+                                            ]),
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
+                                    .frame(width: 90, height: 90)
+                                
+                                if let imageData = viewModel.avatarImageData,
+                                   let uiImage = UIImage(data: imageData) {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 84, height: 84)
+                                        .clipShape(Circle())
+                                } else {
+                                    Circle()
+                                        .fill(AppConstants.Colors.bridgyCard)
+                                        .frame(width: 84, height: 84)
+                                        .overlay(
+                                            Image(systemName: "person.fill")
+                                                .font(.system(size: 36))
+                                                .foregroundStyle(
+                                                    LinearGradient(
+                                                        gradient: Gradient(colors: [
+                                                            AppConstants.Colors.bridgyPrimary,
+                                                            AppConstants.Colors.bridgySecondary
+                                                        ]),
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    )
+                                                )
+                                        )
+                                }
+                            }
+                            .shadow(color: AppConstants.Colors.bridgyPrimary.opacity(0.3), radius: 12, x: 0, y: 6)
                             
-                            Text(viewModel.userName)
-                                .font(AppConstants.Fonts.headline)
+                            VStack(spacing: 8) {
+                                Text(viewModel.userName)
+                                    .font(AppConstants.Fonts.headline)
+                                    .foregroundColor(AppConstants.Colors.bridgyText)
+                                
+                                BadgeView(text: viewModel.userLevel.rawValue, color: Color(viewModel.userLevel.color))
+                            }
                             
-                            BadgeView(text: viewModel.userLevel.rawValue, color: Color(viewModel.userLevel.color))
+                            Button(action: {
+                                showingEditProfile = true
+                            }) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "pencil")
+                                        .font(.system(size: 14, weight: .semibold))
+                                    Text("Редактировать профиль")
+                                }
+                                .font(AppConstants.Fonts.body)
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        gradient: Gradient(colors: [
+                                            AppConstants.Colors.bridgyPrimary,
+                                            AppConstants.Colors.bridgySecondary
+                                        ]),
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .padding(.horizontal, AppConstants.Spacing.medium)
+                                .padding(.vertical, AppConstants.Spacing.small)
+                                .background(
+                                    Capsule()
+                                        .fill(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [
+                                                    AppConstants.Colors.bridgyPrimary.opacity(0.1),
+                                                    AppConstants.Colors.bridgySecondary.opacity(0.05)
+                                                ]),
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            )
+                                        )
+                                )
+                            }
+                            .padding(.top, AppConstants.Spacing.small)
                         }
                     }
                     .padding(.horizontal)
                     
                     // Настройки
                     VStack(alignment: .leading, spacing: AppConstants.Spacing.medium) {
-                        Text("Settings")
+                        Text("Настройки")
                             .font(AppConstants.Fonts.headline)
                             .padding(.horizontal)
                         
                         NavigationLink(destination: SettingsView()) {
-                            SettingsRow(title: "Settings", icon: "gearshape.fill")
+                            SettingsRowCard(title: "Настройки", icon: "gearshape.fill")
                         }
                         
                         NavigationLink(destination: SubscriptionView()) {
-                            SettingsRow(title: "Subscription", icon: "crown.fill", showBadge: !viewModel.isPremium)
+                            SettingsRowCard(title: "Подписка", icon: "crown.fill", showBadge: !viewModel.isPremium)
                         }
                         
                         NavigationLink(destination: NotificationsView()) {
-                            SettingsRow(title: "Notifications", icon: "bell.fill")
+                            SettingsRowCard(title: "Уведомления", icon: "bell.fill")
                         }
                     }
+                    }
+                    .padding(.vertical)
                 }
-                .padding(.vertical)
+                .scrollContentBackground(.hidden)
             }
-            .navigationTitle("Profile")
-            .background(AppConstants.Colors.bridgyBackground)
+            .navigationTitle("Профиль")
             .onAppear {
                 viewModel.loadUser()
             }
-        }
-    }
-}
-
-struct SettingsRow: View {
-    let title: String
-    let icon: String
-    var showBadge: Bool = false
-    
-    var body: some View {
-        CardView {
-            HStack {
-                Image(systemName: icon)
-                    .foregroundColor(AppConstants.Colors.bridgyPrimary)
-                    .frame(width: 30)
-                
-                Text(title)
-                    .font(AppConstants.Fonts.body)
-                
-                Spacer()
-                
-                if showBadge {
-                    BadgeView(text: "Premium", color: AppConstants.Colors.bridgySecondary)
+            .sheet(isPresented: $showingEditProfile) {
+                if let user = viewModel.currentUser {
+                    EditProfileView(user: user)
                 }
-                
-                Image(systemName: "chevron.right")
-                    .foregroundColor(.secondary)
-                    .font(.caption)
+            }
+            .onChange(of: showingEditProfile) { _, isShowing in
+                if !isShowing {
+                    // Обновляем данные после редактирования
+                    viewModel.loadUser()
+                }
             }
         }
-        .padding(.horizontal)
-    }
-}
-
-struct SettingsView: View {
-    var body: some View {
-        Text("Settings")
-            .navigationTitle("Settings")
-    }
-}
-
-struct SubscriptionView: View {
-    var body: some View {
-        Text("Subscription")
-            .navigationTitle("Subscription")
-    }
-}
-
-struct NotificationsView: View {
-    var body: some View {
-        Text("Notifications")
-            .navigationTitle("Notifications")
     }
 }
 

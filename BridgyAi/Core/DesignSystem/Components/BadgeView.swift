@@ -20,19 +20,50 @@ struct BadgeView: View {
     var body: some View {
         Text(text)
             .font(AppConstants.Fonts.caption)
+            .fontWeight(.semibold)
             .foregroundColor(style == .filled ? .white : color)
             .padding(.horizontal, AppConstants.Spacing.small)
-            .padding(.vertical, 4)
+            .padding(.vertical, 6)
             .background(
-                style == .filled
-                    ? color
-                    : Color.clear
+                Group {
+                    if style == .filled {
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                color,
+                                color.opacity(0.9)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    } else {
+                        Color.clear
+                    }
+                }
             )
             .overlay(
                 RoundedRectangle(cornerRadius: AppConstants.CornerRadius.small)
-                    .stroke(color, lineWidth: style == .outlined ? 1 : 0)
+                    .stroke(
+                        style == .outlined
+                            ? LinearGradient(
+                                gradient: Gradient(colors: [color, color.opacity(0.7)]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                            : LinearGradient(
+                                gradient: Gradient(colors: [Color.clear]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                        lineWidth: style == .outlined ? 1.5 : 0
+                    )
             )
             .cornerRadius(AppConstants.CornerRadius.small)
+            .shadow(
+                color: style == .filled ? color.opacity(0.3) : Color.clear,
+                radius: 4,
+                x: 0,
+                y: 2
+            )
     }
 }
 

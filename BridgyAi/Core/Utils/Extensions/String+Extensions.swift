@@ -19,22 +19,32 @@ extension String {
     }
     
     func fuzzyMatch(_ other: String) -> Bool {
-        let normalizedSelf = self.removingWhitespaces()
-        let normalizedOther = other.removingWhitespaces()
+        // Нормализуем строки: убираем пунктуацию, лишние пробелы, приводим к нижнему регистру
+        let normalizedSelf = self.normalizeForComparison()
+        let normalizedOther = other.normalizeForComparison()
         
         // Точное совпадение
         if normalizedSelf == normalizedOther {
             return true
         }
         
-        // Проверка на включение
+        // Проверка на включение (для фраз, где пользователь сказал больше или меньше)
         if normalizedSelf.contains(normalizedOther) || normalizedOther.contains(normalizedSelf) {
             return true
         }
         
-        // Простая проверка на схожесть (можно улучшить алгоритмом Левенштейна)
+        // Проверка на схожесть с помощью алгоритма Левенштейна
         let similarity = calculateSimilarity(normalizedSelf, normalizedOther)
-        return similarity > 0.7
+        return similarity > 0.75 // Повысил порог для более точного сравнения
+    }
+    
+    private func normalizeForComparison() -> String {
+        // Убираем пунктуацию, лишние пробелы, приводим к нижнему регистру
+        return self
+            .lowercased()
+            .replacingOccurrences(of: "[.,!?;:\"'()\\[\\]{}]", with: "", options: .regularExpression)
+            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
     private func calculateSimilarity(_ s1: String, _ s2: String) -> Double {

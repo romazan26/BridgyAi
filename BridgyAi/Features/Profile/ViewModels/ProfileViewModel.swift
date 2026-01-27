@@ -12,6 +12,8 @@ class ProfileViewModel: ObservableObject {
     @Published var userName: String = "User"
     @Published var userLevel: DifficultyLevel = .beginner
     @Published var isPremium: Bool = false
+    @Published var avatarImageData: Data?
+    @Published var currentUser: User?
     
     private let dataService: DataServiceProtocol
     private var cancellables = Set<AnyCancellable>()
@@ -29,6 +31,8 @@ class ProfileViewModel: ObservableObject {
                     self?.userName = user.name
                     self?.userLevel = user.level
                     self?.isPremium = user.isPremium
+                    self?.avatarImageData = user.avatarImageData
+                    self?.currentUser = user
                 }
             )
             .store(in: &cancellables)

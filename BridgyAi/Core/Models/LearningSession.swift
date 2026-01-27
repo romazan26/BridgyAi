@@ -39,6 +39,17 @@ struct LearningSession: Identifiable, Codable {
         self.incorrectAnswers = incorrectAnswers
         self.duration = duration
     }
+    
+    static let mock = LearningSession(
+        setId: "set_001",
+        mode: .flashcards,
+        startTime: Date().addingTimeInterval(-3600),
+        endTime: Date().addingTimeInterval(-3300),
+        cardsStudied: 15,
+        correctAnswers: 12,
+        incorrectAnswers: 3,
+        duration: 300
+    )
 }
 
 enum LearningMode: String, Codable, CaseIterable, Identifiable {

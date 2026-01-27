@@ -17,130 +17,135 @@ struct ProgressView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: AppConstants.Spacing.large) {
-                    // Общий прогресс
-                    CardView {
+            ZStack {
+                // Анимированный фон
+                AnimatedBackground()
+                
+                ScrollView {
+                    VStack(spacing: AppConstants.Spacing.large) {
+                        // Общий прогресс
+                        CardView {
+                            VStack(alignment: .leading, spacing: AppConstants.Spacing.medium) {
+                                Text("Общий прогресс")
+                                    .font(AppConstants.Fonts.headline)
+                                
+                                ProgressBar(progress: viewModel.overallProgress)
+                                
+                                Text("\(Int(viewModel.overallProgress * 100))% мастерства")
+                                    .font(AppConstants.Fonts.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .padding(.horizontal)
+                        
+                        // Статистика
                         VStack(alignment: .leading, spacing: AppConstants.Spacing.medium) {
-                            Text("Общий прогресс")
+                            Text("Статистика")
                                 .font(AppConstants.Fonts.headline)
-                            
-                            ProgressBar(progress: viewModel.overallProgress)
-                            
-                            Text("\(Int(viewModel.overallProgress * 100))% мастерства")
-                                .font(AppConstants.Fonts.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .padding(.horizontal)
-                    
-                    // Статистика
-                    VStack(alignment: .leading, spacing: AppConstants.Spacing.medium) {
-                        Text("Статистика")
-                            .font(AppConstants.Fonts.headline)
-                            .padding(.horizontal)
-                        
-                        HStack(spacing: AppConstants.Spacing.medium) {
-                            StatisticCard(
-                                title: "Карточек изучено",
-                                value: "\(viewModel.totalCardsStudied)",
-                                icon: "rectangle.stack",
-                                color: AppConstants.Colors.bridgyPrimary
-                            )
-                            
-                            StatisticCard(
-                                title: "Время обучения",
-                                value: AppFormatters.formatStudyTime(viewModel.totalStudyTimeMinutes),
-                                icon: "clock",
-                                color: AppConstants.Colors.bridgySuccess
-                            )
-                            
-                            StatisticCard(
-                                title: "Серия дней",
-                                value: "\(viewModel.streakDays)",
-                                icon: "flame",
-                                color: AppConstants.Colors.bridgyWarning
-                            )
-                        }
-                        .padding(.horizontal)
-                    }
-                    
-                    // Система наград
-                    VStack(alignment: .leading, spacing: AppConstants.Spacing.medium) {
-                        HStack {
-                            Text("Награды")
-                                .font(AppConstants.Fonts.headline)
-                            
-                            Spacer()
-                            
-                            Text("\(viewModel.unlockedCount)/\(viewModel.totalCount)")
-                                .font(AppConstants.Fonts.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .padding(.horizontal)
-                        
-                        // Табы
-                        HStack(spacing: 0) {
-                            TabButton(
-                                title: "Все",
-                                isSelected: selectedTab == .all,
-                                action: { selectedTab = .all }
-                            )
-                            TabButton(
-                                title: "Получено (\(viewModel.unlockedCount))",
-                                isSelected: selectedTab == .unlocked,
-                                action: { selectedTab = .unlocked }
-                            )
-                            TabButton(
-                                title: "Заблокировано",
-                                isSelected: selectedTab == .locked,
-                                action: { selectedTab = .locked }
-                            )
-                        }
-                        .padding(.horizontal)
-                        
-                        // Список наград
-                        if viewModel.isLoading {
-                            LoadingView(message: "Загрузка наград...")
-                                .frame(height: 200)
-                        } else {
-                            let displayedAchievements: [Achievement] = {
-                                switch selectedTab {
-                                case .all: return viewModel.achievements
-                                case .unlocked: return viewModel.unlockedAchievements
-                                case .locked: return viewModel.lockedAchievements
-                                }
-                            }()
-                            
-                            if displayedAchievements.isEmpty {
-                                EmptyStateView(
-                                    icon: "trophy",
-                                    title: selectedTab == .unlocked ? "Нет полученных наград" : "Нет заблокированных наград",
-                                    message: selectedTab == .unlocked 
-                                        ? "Продолжайте заниматься, чтобы получить награды!"
-                                        : "Все награды получены!",
-                                    actionTitle: nil,
-                                    action: nil
-                                )
-                                .frame(height: 200)
-                            } else {
-                                LazyVGrid(columns: [
-                                    GridItem(.flexible()),
-                                    GridItem(.flexible())
-                                ], spacing: AppConstants.Spacing.medium) {
-                                    ForEach(displayedAchievements) { achievement in
-                                        AchievementCard(achievement: achievement)
-                                    }
-                                }
                                 .padding(.horizontal)
+                            
+                            HStack(spacing: AppConstants.Spacing.medium) {
+                                StatisticCard(
+                                    title: "Карточек изучено",
+                                    value: "\(viewModel.totalCardsStudied)",
+                                    icon: "rectangle.stack",
+                                    color: AppConstants.Colors.bridgyPrimary
+                                )
+                                
+                                StatisticCard(
+                                    title: "Время обучения",
+                                    value: AppFormatters.formatStudyTime(viewModel.totalStudyTimeMinutes),
+                                    icon: "clock",
+                                    color: AppConstants.Colors.bridgySuccess
+                                )
+                                
+                                StatisticCard(
+                                    title: "Серия дней",
+                                    value: "\(viewModel.streakDays)",
+                                    icon: "flame",
+                                    color: AppConstants.Colors.bridgyWarning
+                                )
+                            }
+                            .padding(.horizontal)
+                        }
+                        
+                        // Система наград
+                        VStack(alignment: .leading, spacing: AppConstants.Spacing.medium) {
+                            HStack {
+                                Text("Награды")
+                                    .font(AppConstants.Fonts.headline)
+                                
+                                Spacer()
+                                
+                                Text("\(viewModel.unlockedCount)/\(viewModel.totalCount)")
+                                    .font(AppConstants.Fonts.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.horizontal)
+                            
+                            // Табы
+                            HStack(spacing: 0) {
+                                TabButton(
+                                    title: "Все",
+                                    isSelected: selectedTab == .all,
+                                    action: { selectedTab = .all }
+                                )
+                                TabButton(
+                                    title: "Получено (\(viewModel.unlockedCount))",
+                                    isSelected: selectedTab == .unlocked,
+                                    action: { selectedTab = .unlocked }
+                                )
+                                TabButton(
+                                    title: "Заблокировано",
+                                    isSelected: selectedTab == .locked,
+                                    action: { selectedTab = .locked }
+                                )
+                            }
+                            .padding(.horizontal)
+                            
+                            // Список наград
+                            if viewModel.isLoading {
+                                LoadingView(message: "Загрузка наград...")
+                                    .frame(height: 200)
+                            } else {
+                                let displayedAchievements: [Achievement] = {
+                                    switch selectedTab {
+                                    case .all: return viewModel.achievements
+                                    case .unlocked: return viewModel.unlockedAchievements
+                                    case .locked: return viewModel.lockedAchievements
+                                    }
+                                }()
+                                
+                                if displayedAchievements.isEmpty {
+                                    EmptyStateView(
+                                        icon: "trophy",
+                                        title: selectedTab == .unlocked ? "Нет полученных наград" : "Нет заблокированных наград",
+                                        message: selectedTab == .unlocked 
+                                            ? "Продолжайте заниматься, чтобы получить награды!"
+                                            : "Все награды получены!",
+                                        actionTitle: nil,
+                                        action: nil
+                                    )
+                                    .frame(height: 200)
+                                } else {
+                                    LazyVGrid(columns: [
+                                        GridItem(.flexible()),
+                                        GridItem(.flexible())
+                                    ], spacing: AppConstants.Spacing.medium) {
+                                        ForEach(displayedAchievements) { achievement in
+                                            AchievementCard(achievement: achievement)
+                                        }
+                                    }
+                                    .padding(.horizontal)
+                                }
                             }
                         }
                     }
+                    .padding(.vertical)
                 }
-                .padding(.vertical)
+                .scrollContentBackground(.hidden)
             }
             .navigationTitle("Прогресс")
-            .background(AppConstants.Colors.bridgyBackground)
             .task {
                 guard !viewModel.hasLoadedData && !viewModel.isLoading else { return }
                 viewModel.loadData()

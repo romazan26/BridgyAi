@@ -16,6 +16,11 @@ protocol DataServiceProtocol {
     func deleteSet(_ set: FlashcardSet) -> AnyPublisher<Void, Error>
     func toggleFavorite(setId: String) -> AnyPublisher<Bool, Error>
     
+    // Мои слова
+    func getMyWordsSet() -> AnyPublisher<FlashcardSet, Error>
+    func addWordToMyWords(_ card: Flashcard) -> AnyPublisher<Void, Error>
+    func removeWordFromMyWords(cardId: String) -> AnyPublisher<Void, Error>
+    
     // Сессии обучения
     func saveLearningSession(_ session: LearningSession) -> AnyPublisher<Void, Error>
     func fetchTodaySessions() -> AnyPublisher<[LearningSession], Error>
@@ -107,6 +112,96 @@ class DataService: DataServiceProtocol {
                 return self.saveSet(updatedSet)
                     .map { updatedSet.isFavorite }
                     .eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    // MARK: - Мои слова
+    
+    func getMyWordsSet() -> AnyPublisher<FlashcardSet, Error> {
+        return fetchSet(by: AppConstants.SpecialSets.myWordsSetId)
+            .catch { _ -> AnyPublisher<FlashcardSet, Error> in
+                // Если набор не существует, создаем его
+                let myWordsSet = FlashcardSet(
+                    id: AppConstants.SpecialSets.myWordsSetId,
+                    title: "Мои слова",
+                    description: "Ваши личные слова и фразы для изучения",
+                    workScenario: .smallTalk,
+                    difficulty: .beginner,
+                    cards: [],
+                    author: nil,
+                    isPremium: false,
+                    averageStudyTime: 0,
+                    totalTerms: 0,
+                    createdAt: Date(),
+                    lastStudied: nil,
+                    masteryLevel: 0.0,
+                    isFavorite: true
+                )
+                return self.saveSet(myWordsSet)
+                    .map { myWordsSet }
+                    .eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func addWordToMyWords(_ card: Flashcard) -> AnyPublisher<Void, Error> {
+        return getMyWordsSet()
+            .flatMap { set -> AnyPublisher<Void, Error> in
+                // Проверяем, нет ли уже такой карточки
+                guard !set.cards.contains(where: { $0.id == card.id }) else {
+                    return Just(())
+                        .setFailureType(to: Error.self)
+                        .eraseToAnyPublisher()
+                }
+                
+                // Создаем новый массив карточек с добавленной карточкой
+                let updatedCards = set.cards + [card]
+                let updatedSet = FlashcardSet(
+                    id: set.id,
+                    title: set.title,
+                    description: set.description,
+                    workScenario: set.workScenario,
+                    difficulty: set.difficulty,
+                    cards: updatedCards,
+                    author: set.author,
+                    isPremium: set.isPremium,
+                    averageStudyTime: updatedCards.count * 2,
+                    totalTerms: updatedCards.count,
+                    createdAt: set.createdAt,
+                    lastStudied: set.lastStudied,
+                    masteryLevel: set.masteryLevel,
+                    isFavorite: set.isFavorite
+                )
+                
+                return self.saveSet(updatedSet)
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func removeWordFromMyWords(cardId: String) -> AnyPublisher<Void, Error> {
+        return getMyWordsSet()
+            .flatMap { set -> AnyPublisher<Void, Error> in
+                // Создаем новый массив карточек без удаляемой карточки
+                let updatedCards = set.cards.filter { $0.id != cardId }
+                let updatedSet = FlashcardSet(
+                    id: set.id,
+                    title: set.title,
+                    description: set.description,
+                    workScenario: set.workScenario,
+                    difficulty: set.difficulty,
+                    cards: updatedCards,
+                    author: set.author,
+                    isPremium: set.isPremium,
+                    averageStudyTime: updatedCards.count * 2,
+                    totalTerms: updatedCards.count,
+                    createdAt: set.createdAt,
+                    lastStudied: set.lastStudied,
+                    masteryLevel: set.masteryLevel,
+                    isFavorite: set.isFavorite
+                )
+                
+                return self.saveSet(updatedSet)
             }
             .eraseToAnyPublisher()
     }

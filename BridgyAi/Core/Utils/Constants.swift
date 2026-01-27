@@ -50,6 +50,11 @@ enum AppConstants {
         static let medium = Color.black.opacity(0.1)
         static let large = Color.black.opacity(0.15)
     }
+    
+    // Идентификаторы специальных наборов
+    enum SpecialSets {
+        static let myWordsSetId = "my_words_set"
+    }
 }
 
 extension Color {

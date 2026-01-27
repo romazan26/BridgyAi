@@ -11,6 +11,7 @@ import Combine
 class LibraryViewModel: ObservableObject {
     @Published var sets: [FlashcardSet] = []
     @Published var filteredSets: [FlashcardSet] = []
+    @Published var myWordsSet: FlashcardSet?
     @Published var searchText: String = ""
     @Published var selectedScenario: WorkScenario?
     @Published var selectedDifficulty: DifficultyLevel?
@@ -36,6 +37,8 @@ class LibraryViewModel: ObservableObject {
         guard !isLoading else { return }
         
         isLoading = true
+        
+        // Загружаем все наборы
         dataService.fetchSets()
             .receive(on: DispatchQueue.main)
             .sink(
@@ -44,7 +47,21 @@ class LibraryViewModel: ObservableObject {
                 },
                 receiveValue: { [weak self] sets in
                     self?.sets = sets
+                    // Загружаем "Мои слова" отдельно
+                    self?.loadMyWordsSet()
                     self?.applyFilters()
+                }
+            )
+            .store(in: &cancellables)
+    }
+    
+    private func loadMyWordsSet() {
+        dataService.getMyWordsSet()
+            .receive(on: DispatchQueue.main)
+            .sink(
+                receiveCompletion: { _ in },
+                receiveValue: { [weak self] set in
+                    self?.myWordsSet = set
                 }
             )
             .store(in: &cancellables)

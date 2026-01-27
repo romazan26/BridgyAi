@@ -11,6 +11,7 @@ struct User: Identifiable, Codable {
     let id: String
     var name: String
     var email: String?
+    var avatarImageData: Data? // Данные изображения профиля
     var level: DifficultyLevel
     var dailyGoal: Int // количество карточек в день
     var streakDays: Int
@@ -24,6 +25,7 @@ struct User: Identifiable, Codable {
         id: String = UUID().uuidString,
         name: String,
         email: String? = nil,
+        avatarImageData: Data? = nil,
         level: DifficultyLevel = .beginner,
         dailyGoal: Int = 20,
         streakDays: Int = 0,
@@ -36,6 +38,7 @@ struct User: Identifiable, Codable {
         self.id = id
         self.name = name
         self.email = email
+        self.avatarImageData = avatarImageData
         self.level = level
         self.dailyGoal = dailyGoal
         self.streakDays = streakDays
