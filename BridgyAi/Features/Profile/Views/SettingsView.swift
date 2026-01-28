@@ -59,14 +59,14 @@ struct SettingsView: View {
     
     private func openPrivacyPolicy() {
         // Замените на реальный URL вашей политики конфиденциальности
-        if let url = URL(string: "https://bridgyai.com/privacy") {
+        if let url = URL(string: "https://www.termsfeed.com/live/d8406493-2b5c-4562-b1f1-b3fb1188cbfd") {
             openURL(url)
         }
     }
     
     private func openTermsOfService() {
         // Замените на реальный URL ваших условий использования
-        if let url = URL(string: "https://bridgyai.com/terms") {
+        if let url = URL(string: "https://www.termsfeed.com/live/a6606792-a441-409a-ad65-2e23fc1fde51") {
             openURL(url)
         }
     }
