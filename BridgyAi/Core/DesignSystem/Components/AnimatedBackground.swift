@@ -8,7 +8,13 @@
 import SwiftUI
 
 struct AnimatedBackground: View {
+    @Environment(\.colorScheme) var colorScheme
     @State private var animate = false
+    
+    // Прозрачность фигур зависит от темы
+    private var shapeOpacity: CGFloat {
+        colorScheme == .dark ? 0.12 : 0.18
+    }
     
     var body: some View {
         GeometryReader { geometry in
@@ -18,16 +24,16 @@ struct AnimatedBackground: View {
                     gradient: Gradient(colors: [
                         AppConstants.Colors.bridgyBackground,
                         AppConstants.Colors.bridgyBackground.opacity(0.95),
-                        AppConstants.Colors.bridgyPrimary.opacity(0.03),
-                        AppConstants.Colors.bridgyCard.opacity(0.25)
+                        AppConstants.Colors.bridgyPrimary.opacity(colorScheme == .dark ? 0.05 : 0.03),
+                        AppConstants.Colors.bridgyCard.opacity(colorScheme == .dark ? 0.15 : 0.25)
                     ]),
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
                 
-                // Плавающие фигуры - хорошо заметные
+                // Плавающие фигуры - адаптивная прозрачность для темной/светлой темы
                 FloatingShape(
-                    color: AppConstants.Colors.bridgyPrimary.opacity(0.18),
+                    color: AppConstants.Colors.bridgyPrimary.opacity(shapeOpacity),
                     size: 250,
                     startX: 0.1,
                     startY: 0.15,
@@ -37,7 +43,7 @@ struct AnimatedBackground: View {
                 )
                 
                 FloatingShape(
-                    color: AppConstants.Colors.bridgySecondary.opacity(0.16),
+                    color: AppConstants.Colors.bridgySecondary.opacity(shapeOpacity * 0.9),
                     size: 200,
                     startX: 0.85,
                     startY: 0.1,
@@ -47,7 +53,7 @@ struct AnimatedBackground: View {
                 )
                 
                 FloatingShape(
-                    color: AppConstants.Colors.bridgyPrimary.opacity(0.15),
+                    color: AppConstants.Colors.bridgyPrimary.opacity(shapeOpacity * 0.85),
                     size: 280,
                     startX: 0.25,
                     startY: 0.75,
@@ -57,7 +63,7 @@ struct AnimatedBackground: View {
                 )
                 
                 FloatingShape(
-                    color: AppConstants.Colors.bridgySecondary.opacity(0.17),
+                    color: AppConstants.Colors.bridgySecondary.opacity(shapeOpacity * 0.95),
                     size: 230,
                     startX: 0.75,
                     startY: 0.85,
@@ -67,7 +73,7 @@ struct AnimatedBackground: View {
                 )
                 
                 FloatingShape(
-                    color: AppConstants.Colors.bridgyPrimary.opacity(0.16),
+                    color: AppConstants.Colors.bridgyPrimary.opacity(shapeOpacity * 0.9),
                     size: 190,
                     startX: 0.5,
                     startY: 0.45,
@@ -77,7 +83,7 @@ struct AnimatedBackground: View {
                 )
                 
                 FloatingShape(
-                    color: AppConstants.Colors.bridgySecondary.opacity(0.14),
+                    color: AppConstants.Colors.bridgySecondary.opacity(shapeOpacity * 0.8),
                     size: 240,
                     startX: 0.15,
                     startY: 0.6,

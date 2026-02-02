@@ -12,28 +12,36 @@ struct OnboardingView: View {
     @State private var currentPage = 0
     
     var body: some View {
-        TabView(selection: $currentPage) {
-            WelcomeView(onContinue: {
-                withAnimation {
-                    currentPage = 1
-                }
-            })
-            .tag(0)
+        ZStack {
+            // Фон на весь экран — за всеми страницами онбординга
+            AnimatedBackground()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .ignoresSafeArea(.all)
             
-            GoalSelectionView(onContinue: {
-                withAnimation {
-                    currentPage = 2
-                }
-            })
-            .tag(1)
-            
-            LevelTestView(onComplete: {
-                appViewModel.completeOnboarding()
-            })
-            .tag(2)
+            TabView(selection: $currentPage) {
+                WelcomeView(onContinue: {
+                    withAnimation {
+                        currentPage = 1
+                    }
+                })
+                .tag(0)
+                
+                GoalSelectionView(onContinue: {
+                    withAnimation {
+                        currentPage = 2
+                    }
+                })
+                .tag(1)
+                
+                LevelTestView(onComplete: {
+                    appViewModel.completeOnboarding()
+                })
+                .tag(2)
+            }
+            .tabViewStyle(.page)
+            .indexViewStyle(.page(backgroundDisplayMode: .always))
         }
-        .tabViewStyle(.page)
-        .indexViewStyle(.page(backgroundDisplayMode: .always))
+        .ignoresSafeArea(.all)
     }
 }
 
@@ -42,8 +50,7 @@ struct WelcomeView: View {
     
     var body: some View {
         ZStack {
-            AnimatedBackground()
-            
+            // Фон убран — используется общий фон TabView
             VStack(spacing: AppConstants.Spacing.xLarge) {
                 Spacer()
                     .frame(height: 60)
@@ -103,8 +110,6 @@ struct GoalSelectionView: View {
     
     var body: some View {
         ZStack {
-            AnimatedBackground()
-            
             VStack(spacing: AppConstants.Spacing.large) {
                 VStack(spacing: AppConstants.Spacing.small) {
                     Text("Какова ваша цель?")
@@ -212,8 +217,6 @@ struct LevelTestView: View {
     
     var body: some View {
         ZStack {
-            AnimatedBackground()
-            
             VStack(spacing: AppConstants.Spacing.large) {
                 VStack(spacing: AppConstants.Spacing.small) {
                     Text("Какой у вас уровень?")

@@ -10,9 +10,40 @@ import StoreKit
 
 struct SettingsView: View {
     @Environment(\.openURL) var openURL
+    @ObservedObject private var themeManager = ThemeManager.shared
     
     var body: some View {
         List {
+            // Секция выбора темы
+            Section {
+                VStack(alignment: .leading, spacing: AppConstants.Spacing.medium) {
+                    HStack {
+                        Image(systemName: "paintbrush.fill")
+                            .foregroundColor(AppConstants.Colors.bridgyPrimary)
+                            .font(.title3)
+                        Text("Оформление")
+                            .font(AppConstants.Fonts.headline)
+                    }
+                    
+                    HStack(spacing: AppConstants.Spacing.small) {
+                        ForEach(AppTheme.allCases, id: \.self) { theme in
+                            ThemeOptionButton(
+                                theme: theme,
+                                isSelected: themeManager.currentTheme == theme,
+                                action: {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                        themeManager.currentTheme = theme
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+                .padding(.vertical, AppConstants.Spacing.small)
+            } header: {
+                Text("Тема")
+            }
+            
             Section("О приложении") {
                 Button(action: {
                     rateApp()
@@ -74,6 +105,68 @@ struct SettingsView: View {
     private func getAppID() -> String {
         // Замените на реальный App ID вашего приложения в App Store
         return "YOUR_APP_ID"
+    }
+}
+
+/// Кнопка выбора темы
+struct ThemeOptionButton: View {
+    let theme: AppTheme
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: AppConstants.Spacing.small) {
+                // Иконка темы
+                ZStack {
+                    Circle()
+                        .fill(
+                            isSelected
+                                ? LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        AppConstants.Colors.bridgyPrimary,
+                                        AppConstants.Colors.bridgySecondary
+                                    ]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                                : LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color(.systemGray5),
+                                        Color(.systemGray6)
+                                    ]),
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                        )
+                        .frame(width: 50, height: 50)
+                    
+                    Image(systemName: theme.icon)
+                        .font(.system(size: 22))
+                        .foregroundColor(isSelected ? .white : .secondary)
+                }
+                
+                // Название темы
+                Text(theme.displayName)
+                    .font(AppConstants.Fonts.caption)
+                    .foregroundColor(isSelected ? AppConstants.Colors.bridgyPrimary : .secondary)
+                    .fontWeight(isSelected ? .semibold : .regular)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, AppConstants.Spacing.small)
+            .background(
+                RoundedRectangle(cornerRadius: AppConstants.CornerRadius.medium)
+                    .fill(isSelected ? AppConstants.Colors.bridgyPrimary.opacity(0.1) : Color.clear)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: AppConstants.CornerRadius.medium)
+                    .stroke(
+                        isSelected ? AppConstants.Colors.bridgyPrimary : Color.clear,
+                        lineWidth: 2
+                    )
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 

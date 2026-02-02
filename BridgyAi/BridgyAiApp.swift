@@ -13,14 +13,19 @@ struct BridgyAiApp: App {
         // Безопасная инициализация с обработкой ошибок
         return AppViewModel()
     }()
+    @StateObject private var themeManager = ThemeManager.shared
     
     var body: some Scene {
         WindowGroup {
-            if appViewModel.isOnboardingCompleted {
-                MainTabView()
-            } else {
-                OnboardingView(appViewModel: appViewModel)
+            Group {
+                if appViewModel.isOnboardingCompleted {
+                    MainTabView()
+                } else {
+                    OnboardingView(appViewModel: appViewModel)
+                }
             }
+            .preferredColorScheme(themeManager.preferredColorScheme)
+            .environmentObject(themeManager)
         }
     }
 }
